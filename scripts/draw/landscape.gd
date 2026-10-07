@@ -10,6 +10,9 @@ extends Control
 @export var seed_value := 7
 @export var show_path := false
 @export var path_points: PackedVector2Array = PackedVector2Array()
+@export var layer := "all"            # all | far | near
+@export var parallax_x := 0.0
+@export var span_w := 0.0
 
 const PAPER_SHADOW := Color(0.04, 0.16, 0.15, 0.22)
 
@@ -42,49 +45,95 @@ func _draw() -> void:
 		return
 	var sky: Array = _sky_colors()
 	var hy := h * horizon
-	# langit gradasi
-	var sky_poly := PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, hy + 40), Vector2(0, hy + 40)])
-	draw_polygon(sky_poly, PackedColorArray([sky[0], sky[0], sky[1], sky[1]]))
-	# matahari dengan cincin lembut
-	var sun := Vector2(w * clampf(mountain_x + 0.18, 0.1, 0.9), hy * 0.36)
-	if w > h * 3.0:
-		sun = Vector2(minf(w * 0.12, 700.0), hy * 0.32)
-	for i in 4:
-		draw_circle(sun, 70.0 + i * 26.0, Color(sky[2], 0.16 - i * 0.03), true, -1.0, true)
-	draw_circle(sun, 58, sky[2].lightened(0.15), true, -1.0, true)
-
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
-
-	# Gunung Slamet (satu atau beberapa bila latar lebar)
-	var mounts: Array = []
-	if w > h * 3.0:
-		var n := int(w / 1500.0) + 1
-		for i in n:
-			mounts.append(w * (i + 0.5) / n)
-	else:
-		mounts.append(w * mountain_x)
-	for mx in mounts:
-		_mountain(Vector2(mx + 160, hy + 10), h * 0.30, h * 0.75, Color("8fb8b0"))
-		_mountain(Vector2(mx, hy + 10), h * 0.42, h * 0.95, Color("5f8f8a"))
-
-	# bukit berlapis (papercut)
-	_hills(hy - h * 0.02, h * 0.06, 0.004, 1.3, Color("7fb07a"))
+	if layer != "near":
+		draw_set_transform(Vector2(-parallax_x, 0), 0.0, Vector2.ONE)
+		var span := span_w if span_w > 0.0 else w + parallax_x + 40.0
+		# langit gradasi tiga warna
+		var mid := hy * 0.62
+		draw_polygon(PackedVector2Array([Vector2(-40, 0), Vector2(span, 0), Vector2(span, mid), Vector2(-40, mid)]),
+			PackedColorArray([sky[0], sky[0], sky[0].lerp(sky[1], 0.6), sky[0].lerp(sky[1], 0.6)]))
+		draw_polygon(PackedVector2Array([Vector2(-40, mid), Vector2(span, mid), Vector2(span, hy + 60), Vector2(-40, hy + 60)]),
+			PackedColorArray([sky[0].lerp(sky[1], 0.6), sky[0].lerp(sky[1], 0.6), sky[1], sky[1]]))
+		# matahari dengan halo lembut
+		var sun := Vector2(w * clampf(mountain_x + 0.18, 0.1, 0.9), hy * 0.36)
+		if w > h * 3.0 or layer == "far":
+			sun = Vector2(minf(w * 0.16, 520.0), hy * 0.34)
+		for i in 5:
+			draw_circle(sun, 64.0 + i * 24.0, Color(sky[2], 0.15 - i * 0.025), true, -1.0, true)
+		draw_circle(sun, 56, sky[2].lightened(0.2), true, -1.0, true)
+		draw_circle(sun + Vector2(-14, -14), 20, Color(1, 1, 1, 0.25), true, -1.0, true)
+		# Gunung Slamet
+		var mounts: Array = []
+		var wide := span if layer == "far" else w
+		if wide > h * 3.0:
+			var n := int(wide / 1500.0) + 1
+			for i in n:
+				mounts.append(wide * (i + 0.5) / n)
+		else:
+			mounts.append(w * mountain_x)
+		for mx in mounts:
+			_mountain(Vector2(mx + 170, hy + 10), h * 0.30, h * 0.75, Color("97c0b7"))
+			_mountain(Vector2(mx, hy + 10), h * 0.42, h * 0.95, Color("5f8f8a"))
+		var far_w := span
+		_hills_w(hy - h * 0.02, h * 0.06, 0.004, 1.3, Color("86b880"), far_w)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if layer == "far":
+		return
 	_hills(hy + h * 0.04, h * 0.05, 0.006, 4.1, Color("5f9a55"))
-	# pohon kelapa jauh
+	# pohon kelapa dan pohon rindang di kejauhan
 	var x := 30.0
+	var i2 := 0
 	while x < w:
-		_palm(Vector2(x + rng.randf_range(-20, 20), hy + h * 0.05), h * rng.randf_range(0.10, 0.14), Color("3f6f3a"))
-		x += rng.randf_range(180, 360)
+		if i2 % 3 == 2:
+			_round_tree(Vector2(x + rng.randf_range(-20, 20), hy + h * 0.065), h * rng.randf_range(0.06, 0.08))
+		else:
+			_palm(Vector2(x + rng.randf_range(-20, 20), hy + h * 0.05), h * rng.randf_range(0.10, 0.14), Color("3f6f3a"))
+		x += rng.randf_range(160, 320)
+		i2 += 1
 	_hills(hy + h * 0.10, h * 0.035, 0.009, 2.2, Color("8cc063"))
-	# sawah berundak
 	_terraces(hy + h * 0.13, h)
-
 	if show_path and path_points.size() > 1:
 		_draw_path()
-
 	for p in places:
 		_place(str(p.get("kind", "")), float(p.get("x", 0.0)), float(p.get("y", h * 0.80)), float(p.get("s", 1.0)))
+	# bunga liar di latar depan
+	var fx := 40.0
+	while fx < w:
+		var fy := h - rng.randf_range(10, h * 0.12)
+		var fc: Color = [Color("f2b134"), Color("ffffff"), Color("e8a0b4"), Color("f08a4b")][rng.randi() % 4]
+		for q in 5:
+			var a := q * TAU / 5.0
+			draw_circle(Vector2(fx, fy) + Vector2(cos(a), sin(a)) * 5.0, 4.0, fc, true, -1.0, true)
+		draw_circle(Vector2(fx, fy), 3.0, Color("9c3d2a"), true, -1.0, true)
+		fx += rng.randf_range(90, 220)
+
+
+func _round_tree(base: Vector2, r: float) -> void:
+	draw_line(base, base + Vector2(0, -r * 1.2), Color("5a4430"), maxf(3.0, r * 0.18), true)
+	var c := base + Vector2(0, -r * 1.6)
+	draw_circle(c + Vector2(6, -4), r, PAPER_SHADOW, true, -1.0, true)
+	draw_circle(c + Vector2(-r * 0.5, r * 0.2), r * 0.75, Color("3f7a3a"), true, -1.0, true)
+	draw_circle(c + Vector2(r * 0.5, r * 0.25), r * 0.7, Color("3f7a3a"), true, -1.0, true)
+	draw_circle(c, r * 0.9, Color("4b8a42"), true, -1.0, true)
+	draw_circle(c + Vector2(-r * 0.25, -r * 0.3), r * 0.35, Color(1, 1, 1, 0.12), true, -1.0, true)
+
+
+func _hills_w(base_y: float, amp: float, freq: float, phase: float, col: Color, w: float) -> void:
+	var pts := PackedVector2Array()
+	pts.append(Vector2(-40, size.y))
+	var x := -40.0
+	while x <= w + 24:
+		var y := base_y - amp * (0.6 + 0.4 * sin(x * freq + phase)) - amp * 0.35 * sin(x * freq * 2.7 + phase * 2.0)
+		pts.append(Vector2(x, y))
+		x += 24.0
+	pts.append(Vector2(w + 24, size.y))
+	var shadow := pts.duplicate()
+	for i in range(1, shadow.size() - 1):
+		shadow[i] += Vector2(0, -9)
+	draw_colored_polygon(shadow, PAPER_SHADOW)
+	draw_colored_polygon(pts, col)
 
 
 func _mountain(base: Vector2, height: float, width: float, col: Color) -> void:
@@ -103,6 +152,13 @@ func _mountain(base: Vector2, height: float, width: float, col: Color) -> void:
 		shadow[i] += Vector2(8, -6)
 	draw_colored_polygon(shadow, PAPER_SHADOW)
 	draw_colored_polygon(pts, col)
+	# sisi teduh (cahaya dari kiri)
+	var shade := PackedVector2Array()
+	shade.append(Vector2(base.x, base.y - height * 0.97))
+	for i in range(steps / 2 + 1, steps + 1):
+		shade.append(pts[i])
+	shade.append(Vector2(base.x + width * 0.08, base.y))
+	draw_colored_polygon(shade, Color(col.darkened(0.12), 0.55))
 	# guratan lereng
 	var top := Vector2(base.x, base.y - height * 0.97)
 	for i in 5:

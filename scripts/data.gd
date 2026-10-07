@@ -352,6 +352,19 @@ const SESSION_TEMPLATES := [
 ]
 
 
+# --------------------------------------------------------------------------- TIP JALI
+const TIPS := [
+	"Bergerak 10 menit sehari sudah bagus, Mbah!",
+	"Minum air putih sebelum dan sesudah latihan, ya.",
+	"Selalu siapkan kursi kokoh di dekat Mbah.",
+	"Napas tetap mengalir, jangan ditahan.",
+	"Bila pusing atau nyeri, berhenti dan beri tahu kader.",
+	"Latihan bersama teman di Posyandu lebih seru!",
+	"Pelan-pelan saja, yang penting rutin.",
+]
+const PLACE_KIND := ["balai", "rumah", "sawah", "pematang", "bambu", "sumur", "pasar", "kali", "posyandu"]
+
+
 static func station_index(id: String) -> int:
 	for i in STATIONS.size():
 		if STATIONS[i]["id"] == id:

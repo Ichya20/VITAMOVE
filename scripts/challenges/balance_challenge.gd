@@ -29,14 +29,18 @@ var _right: Button
 var _rng := RandomNumberGenerator.new()
 
 
-func setup(av: String) -> void:
+var outfit := 0
+
+
+func setup(av: String, o: int = 0) -> void:
 	avatar = av
+	outfit = o
 	add_theme_constant_override("separation", 12)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_rng.randomize()
 	var head := UI.hbox(12)
-	head.add_child(Icon.new("balance", Game.LEAF, 40))
+	head.add_child(UI.badge("balance", Game.LEAF, 48))
 	var tl := UI.label("Titian Pematang", "H2")
 	tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(tl)
@@ -81,7 +85,7 @@ func setup(av: String) -> void:
 	_stage.draw.connect(_draw_stage)
 	mid.add_child(_stage)
 	_fig = ElderFigure.new()
-	_fig.set_avatar(avatar)
+	_fig.set_avatar(avatar, outfit)
 	_fig.anchor_left = 0.3
 	_fig.anchor_right = 0.7
 	_fig.anchor_top = 0.02
@@ -149,12 +153,14 @@ func _process(delta: float) -> void:
 		_bar.value = _progress
 		var step := sin(_t * 4.0) if in_zone else 0.0
 		_fig.set_pose({"tilt": _needle * 14.0, "la": 60.0 + _needle * 20.0, "ra": 60.0 - _needle * 20.0,
-			"ll": maxf(0.0, step) * 0.3, "rl": maxf(0.0, -step) * 0.3})
+			"ll": maxf(0.0, step) * 0.3, "rl": maxf(0.0, -step) * 0.3, "face": "focus" if in_zone else "o"})
 		if _progress >= 1.0:
 			_running = false
 			_finished = true
 			_push = 0.0
-			Sfx.play("leaf")
+			Sfx.play("cheer")
+			FX.burst(_stage, _stage.size / 2.0, 30)
+			_fig.set_pose({"la": 160.0, "ra": 160.0, "face": "happy"})
 			_hint.text = "Sampai di ujung pematang! Keseimbangan Mbah hebat."
 			Game.speak(_hint.text)
 			_start.visible = true
