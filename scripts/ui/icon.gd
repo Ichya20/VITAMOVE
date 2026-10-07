@@ -260,8 +260,11 @@ func _draw() -> void:
 			var fc := Color("23302e")
 			var eye_y := 0.42
 			if kind == "face_tired":
-				draw_line(_p(0.3, 0.42), _p(0.42, 0.44), fc, s * 0.06, true)
-				draw_line(_p(0.58, 0.44), _p(0.7, 0.42), fc, s * 0.06, true)
+				# mata sayu (setengah terpejam) dan setitik keringat
+				draw_arc(_p(0.36, 0.40), s * 0.07, 0.2, PI - 0.2, 10, fc, s * 0.05, true)
+				draw_arc(_p(0.64, 0.40), s * 0.07, 0.2, PI - 0.2, 10, fc, s * 0.05, true)
+				draw_circle(_p(0.8, 0.3), s * 0.05, Color("7cc3e0"), true, -1.0, true)
+				draw_colored_polygon(PackedVector2Array([_p(0.8, 0.2), _p(0.76, 0.29), _p(0.84, 0.29)]), Color("7cc3e0"))
 			else:
 				draw_circle(_p(0.36, eye_y), s * 0.05, fc, true, -1.0, true)
 				draw_circle(_p(0.64, eye_y), s * 0.05, fc, true, -1.0, true)
@@ -271,6 +274,10 @@ func _draw() -> void:
 				"face_ok":
 					draw_line(_p(0.36, 0.66), _p(0.64, 0.66), fc, s * 0.06, true)
 				_:
-					draw_arc(_p(0.5, 0.76), s * 0.14, PI + 0.4, TAU - 0.4, 16, fc, s * 0.06, true)
+					var wv := PackedVector2Array()
+					for i in 9:
+						var t := float(i) / 8.0
+						wv.append(_p(0.36 + 0.28 * t, 0.68 + sin(t * TAU) * 0.03))
+					draw_polyline(wv, fc, s * 0.055, true)
 		_:
 			_dot(Vector2(0.5, 0.5), 0.3)

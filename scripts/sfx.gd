@@ -3,6 +3,10 @@ extends Node
 
 const SOUNDS := {
 	"tap": preload("res://assets/audio/tap.wav"),
+	"pop": preload("res://assets/audio/pop.wav"),
+	"page": preload("res://assets/audio/page.wav"),
+	"whoosh": preload("res://assets/audio/whoosh.wav"),
+	"cheer": preload("res://assets/audio/cheer.wav"),
 	"tick": preload("res://assets/audio/tick.wav"),
 	"tick_accent": preload("res://assets/audio/tick_accent.wav"),
 	"success": preload("res://assets/audio/success.wav"),
@@ -17,6 +21,7 @@ var _music: AudioStreamPlayer
 var _pool: Array[AudioStreamPlayer] = []
 var _next := 0
 var _duck := 1.0
+var _duck_target := 1.0
 
 
 func _ready() -> void:
@@ -28,13 +33,19 @@ func _ready() -> void:
 	bgm.loop_end = int(bgm.get_length() * bgm.mix_rate)
 	_music.stream = bgm
 	add_child(_music)
-	for i in 6:
+	for i in 8:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		_pool.append(p)
 	apply_volume()
 	Game.settings_changed.connect(apply_volume)
 	_music.play()
+
+
+func _process(delta: float) -> void:
+	if not is_equal_approx(_duck, _duck_target):
+		_duck = move_toward(_duck, _duck_target, delta * 1.5)
+		apply_volume()
 
 
 func _lin(v: float) -> float:
@@ -51,14 +62,14 @@ func apply_volume() -> void:
 
 func duck(on: bool) -> void:
 	## Kecilkan musik saat latihan agar hitungan dan suara pemandu jelas.
-	_duck = 0.35 if on else 1.0
-	apply_volume()
+	_duck_target = 0.3 if on else 1.0
 
 
-func play(sound: String) -> void:
+func play(sound: String, pitch: float = 1.0) -> void:
 	if float(Game.settings["sfx"]) <= 0.001 or not SOUNDS.has(sound):
 		return
 	var p := _pool[_next]
 	_next = (_next + 1) % _pool.size()
 	p.stream = SOUNDS[sound]
+	p.pitch_scale = pitch
 	p.play()

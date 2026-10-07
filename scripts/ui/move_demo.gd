@@ -1,6 +1,6 @@
 class_name MoveDemo
 extends Control
-## Memutar demonstrasi gerakan: hitung mundur, hitungan berirama, isyarat, dan pengulangan.
+## Memutar demonstrasi gerakan: hitung mundur, hitungan berirama, isyarat, ekspresi, dan ulangan.
 
 signal beat(count: int, cue: String)
 signal rep_changed(rep: int, reps: int)
@@ -34,12 +34,12 @@ func _init() -> void:
 	add_child(figure)
 
 
-func setup(id: String, capacity: int, avatar: String, reps_override: int = -1) -> void:
+func setup(id: String, capacity: int, avatar: String, reps_override: int = -1, outfit: int = 0) -> void:
 	move_id = id
 	var m: Dictionary = Data.MOVES[id]
 	variant = Data.move_variant(id, capacity)
 	reps = reps_override if reps_override > 0 else int(m["reps"])
-	figure.set_avatar(avatar)
+	figure.set_avatar(avatar, outfit)
 	figure.chair = int(variant["chair"])
 	figure.support_hand = bool(variant["support"])
 	_base = {"sit": float(variant["sit_base"])}
@@ -52,11 +52,19 @@ func setup(id: String, capacity: int, avatar: String, reps_override: int = -1) -
 		var p := _base.duplicate()
 		for kk in keys[i].keys():
 			p[kk] = keys[i][kk]
+		var snd: String = str(sounds[i]) if i < sounds.size() else ""
+		var bt: int = int(beats[i]) if i < beats.size() else 1
+		var fc := "smile"
+		if snd == "breath_in":
+			fc = "o"
+		elif snd == "breath_out":
+			fc = "blow"
+		elif bt >= 2:
+			fc = "focus"
 		_seq.append({
-			"pose": p,
-			"beats": int(beats[i]) if i < beats.size() else 1,
+			"pose": p, "beats": bt, "face": fc,
 			"cue": str(cues[i]) if i < cues.size() else "",
-			"sound": str(sounds[i]) if i < sounds.size() else "",
+			"sound": snd,
 		})
 	_start_pose = _seq.back()["pose"] if not _seq.is_empty() else _base
 	reset()
@@ -73,13 +81,8 @@ func reset() -> void:
 	_countdown = 0
 	_from = _merged(_start_pose)
 	_to = _from
+	figure.face = "smile"
 	figure.set_pose(_from)
-
-
-func preview_pose(index: int) -> void:
-	if _seq.is_empty():
-		return
-	figure.set_pose(_merged(_seq[clampi(index, 0, _seq.size() - 1)]["pose"]))
 
 
 func _merged(p: Dictionary) -> Dictionary:
@@ -102,6 +105,7 @@ func start(with_countdown: bool = true) -> void:
 			beat.emit(-3, "Siap...")
 			Sfx.play("tick")
 		else:
+			rep_changed.emit(1, reps)
 			_begin_segment(0)
 
 
@@ -126,11 +130,16 @@ func progress() -> float:
 	return 0.0 if tb == 0 else clampf(float(_count) / tb, 0.0, 1.0)
 
 
+func current_rep() -> int:
+	return _rep
+
+
 func _begin_segment(i: int) -> void:
 	_seg = i
 	_seg_t = 0.0
 	_from = figure.pose.duplicate()
 	_to = _merged(_seq[i]["pose"])
+	figure.face = str(_seq[i]["face"])
 	var cue: String = _seq[i]["cue"]
 	segment_changed.emit(cue)
 	var snd: String = _seq[i]["sound"]
@@ -172,16 +181,13 @@ func _process(delta: float) -> void:
 	var seg: Dictionary = _seq[_seg]
 	var beats_n := int(seg["beats"])
 	var dur := beats_n * bs
-	# gerak pada satu ketukan pertama, lalu tahan
-	var move_time := minf(dur, bs) * 0.9
+	# bergerak pada ketukan pertama, lalu menahan
+	var move_time := minf(dur, bs) * 0.85
 	var t := clampf(_seg_t / move_time, 0.0, 1.0)
 	var e := t * t * (3.0 - 2.0 * t)
 	var p := {}
 	for k in _to.keys():
-		var a := float(_from.get(k, 0.0))
-		var b := float(_to[k])
-		p[k] = lerpf(a, b, e)
-	# napas halus saat menahan
+		p[k] = lerpf(float(_from.get(k, 0.0)), float(_to[k]), e)
 	if beats_n >= 2 and t >= 1.0:
 		p["breath"] = float(p.get("breath", 0.0)) + sin(_seg_t * 2.0) * 0.08
 	figure.set_pose(p)
@@ -196,16 +202,8 @@ func _process(delta: float) -> void:
 			if _rep >= reps:
 				playing = false
 				done = true
-				# kembali ke posisi awal dengan lembut
-				var tw := create_tween()
-				var start_pose := figure.pose.duplicate()
-				var end_pose := _merged(_start_pose)
-				var blend := func(v: float) -> void:
-					var q := {}
-					for k in end_pose.keys():
-						q[k] = lerpf(float(start_pose.get(k, 0.0)), float(end_pose[k]), v)
-					figure.set_pose(q)
-				tw.tween_method(blend, 0.0, 1.0, 0.6)
+				figure.face = "happy"
+				figure.set_pose(_merged(_start_pose))
 				finished.emit()
 				return
 			rep_changed.emit(_rep + 1, reps)

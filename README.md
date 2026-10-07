@@ -1,28 +1,30 @@
-# VITAMOVE – Jelajah Sehat Desa
+# VITAMOVE – Jelajah Sehat Desa (v1.1)
 
 Game edukasi aktivitas fisik untuk lansia (Android, landscape), dibuat dengan **Godot 4.7.2** berdasarkan proposal Pengabdian Masyarakat Telkom University 2026 untuk Posyandu Lansia Wreda Asih 2, Desa Muntang.
 
 ## Cara membuka
 1. Buka Godot 4.7.2 → **Import** → pilih `project.godot` di folder ini.
 2. Tekan **F5** untuk menjalankan.
-3. Ekspor Android: **Project → Export → Android** (preset sudah tersedia, paket `id.ac.telkomuniversity.vitamove`, orientasi landscape). Isi keystore milik tim sebelum ekspor rilis.
-
-APK siap pasang tersedia di halaman **Releases** repositori ini.
+3. Ekspor Android: **Project → Export → Android** (preset tersedia, paket `id.ac.telkomuniversity.vitamove`, orientasi landscape). Isi keystore milik tim sebelum ekspor rilis.
 
 ## Alur game
-- **Peserta**: satu HP bisa dipakai beberapa lansia; pilih Mbah Putri/Kakung dan cara berlatih (duduk, berpegangan, mandiri).
-- **Peta desa**: 9 pos (Balai Desa → Posyandu) sesuai materi proposal: manfaat, persiapan, pemanasan, keseimbangan, kelenturan, kekuatan ringan, aktivitas sehari-hari, pendinginan, keselamatan.
-- **Setiap pos**: LIHAT kartu materi → IKUTI demonstrasi gerakan berhitung (cek badan harian, versi lebih ringan) → COBA tantangan (kuis, Rapikan Rumah, Titian Pematang, Belanja Aman, Lampu Tubuh) → dapat daun.
-- **Catatan**: hari aktif, riwayat latihan, kuis awal/akhir (pretest–posttest) dengan persentase peningkatan.
-- **Sesi Bersama (kader)**: pilih rangkaian, catat jumlah peserta, putar latihan berurutan.
+- **Peserta**: satu HP untuk beberapa lansia; pilih tokoh (Mbah Putri/Mbah Kakung), warna baju, dan cara berlatih (duduk, berpegangan, mandiri).
+- **Peta desa berlapis**: 9 pos (Balai Desa → Posyandu) sesuai materi proposal. Tokoh berjalan ke pos baru yang terbuka.
+- **Setiap pos**: LIHAT kartu materi → IKUTI demonstrasi gerakan berhitung (cek badan harian, versi lebih ringan) → COBA tantangan (kuis, Rapikan Rumah, Titian Pematang, Belanja Aman, Lampu Tubuh) → perayaan daun.
+- **Catatan**: kalender 14 hari, riwayat, grafik kuis awal/akhir dengan persentase peningkatan.
+- **Sesi Bersama (kader)**: pilih rangkaian, catat kehadiran, pilih pemandu (Bu Kader/Mbah Putri/Mbah Kakung), putar latihan berurutan.
 - **Info Aplikasi**: ketua tim, anggota tim, tim mahasiswa, mitra, cara memakai.
 
+## Yang baru di v1.1
+- Tokoh berkontur dengan gerak luwes (pegas), napas dan kedip saat diam, ekspresi wajah per gerakan, dan tokoh baru Bu Kader.
+- Komponen UI baru: tombol taktil, kartu ketuk, penunjuk langkah, cincin hitungan, gelembung bicara, lencana ikon, notifikasi singkat.
+- Transisi layar "sapuan kertas" bermotif kawung, kemunculan bertahap, semburan daun dan konfeti.
+- Pengaturan **Animasi: Dikurangi** untuk pengguna yang mudah pusing.
+
 ## Struktur
-- `scripts/game.gd` (status, simpan, tema, TTS), `scripts/sfx.gd` (audio), `scripts/data.gd` (materi)
-- `scripts/screens/` layar, `scripts/challenges/` tantangan, `scripts/draw/` grafis vektor (tokoh, desa, maskot Jali)
-- `assets/` fon (OFL) dan audio gamelan buatan sendiri
+- `scripts/game.gd` (status, simpan, tema), `scripts/sfx.gd` (audio), `scripts/data.gd` (materi)
+- `scripts/screens/` layar, `scripts/challenges/` tantangan, `scripts/ui/` komponen, `scripts/draw/` grafis vektor
+- `assets/` fon (OFL), audio gamelan dan efek prosedural, tekstur partikel
+- `tools/` skrip Python pembuat aset; `scripts/dev/tour.gd` tur tangkapan layar (tidak ikut diekspor)
 
 Catatan: VITAMOVE adalah sarana edukasi, bukan pengganti nasihat tenaga kesehatan.
-
-## Aset prosedural
-`tools/gen_audio.py` dan `tools/gen_images.py` (Python 3 + Pillow) membuat ulang audio gamelan, ikon, dan splash.

@@ -1,10 +1,10 @@
 extends Screen
-## Info aplikasi: tentang VITAMOVE, mitra, dan tim pengusul (sesuai proposal).
+## Info aplikasi: tentang VITAMOVE, tim pengusul, mitra & program, dan cara memakai.
 
 const KETUA := {"name": "Aminatus Sa'adah, S.Si., M.Si.", "role": "Ketua Tim · Koordinator", "detail": "Asisten Ahli · S1 Teknik Informatika, Telkom University Kampus Purwokerto"}
 const ANGGOTA := [
-	{"name": "Evia Zunita Dwi Pratiwi, S.T., M.Sc.", "role": "Anggota Tim (Dosen)"},
-	{"name": "Yohani Setiya Rafika Nur, S.Kom., M.Kom", "role": "Anggota Tim (Dosen)"},
+	{"name": "Evia Zunita Dwi Pratiwi, S.T., M.Sc.", "role": "Anggota Tim · Dosen"},
+	{"name": "Yohani Setiya Rafika Nur, S.Kom., M.Kom", "role": "Anggota Tim · Dosen"},
 ]
 const MAHASISWA := [
 	{"name": "Ichya Ulumiddiin", "nim": "103112400076"},
@@ -13,39 +13,46 @@ const MAHASISWA := [
 	{"name": "Elisa Kusumaningsih", "nim": "101132400034"},
 ]
 
-var _tabs: Array[Button] = []
+var _tabs: Array = []
 var _page: VBoxContainer
 var _tab := 0
 var _scroll: ScrollContainer
 
 
 func build() -> void:
-	soft_bg("balai", "pagi", 0.66)
+	scene_bg("balai", "pagi", 0.5)
 	make_content(26)
-	var v := UI.vbox(12)
+	var v := UI.vbox(14)
 	content.add_child(v)
-	v.add_child(top_bar("Info Aplikasi"))
-	var row := UI.hbox(16)
+	v.add_child(header("Info Aplikasi", "VITAMOVE · versi 1.1"))
+	var row := UI.hbox(18)
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(row)
-	var side := UI.vbox(10)
-	side.custom_minimum_size = Vector2(280, 0)
+	var side := UI.vbox(12)
+	side.custom_minimum_size = Vector2(310, 0)
 	row.add_child(side)
-	var names := ["Tentang VITAMOVE", "Tim Pengusul", "Mitra & Program", "Cara Memakai"]
-	var icons := ["leaf", "people", "home", "book"]
-	for i in names.size():
-		var b := UI.btn(names[i], "ChoiceButton", icons[i], 76, 30)
-		b.toggle_mode = true
-		b.button_pressed = i == 0
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.pressed.connect(func() -> void:
-			Sfx.play("tap")
-			_show(i))
-		side.add_child(b)
-		_tabs.append(b)
+	var tabs := [["Tentang VITAMOVE", "leaf", Game.LEAF], ["Tim Pengusul", "people", Game.TERRA], ["Mitra & Program", "home", Game.TEAL_MID], ["Cara Memakai", "book", Game.SAFFRON_DARK]]
+	for i in tabs.size():
+		var t := TapCard.new()
+		t.set("accessibility_name", tabs[i][0])
+		var h := UI.hbox(12)
+		h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		t.add_child(h)
+		h.add_child(UI.badge(tabs[i][1], tabs[i][2], 44))
+		var l := UI.label(tabs[i][0], "H3", true)
+		l.add_theme_font_size_override("font_size", Game.fs_cap(22))
+		h.add_child(l)
+		var ii := i
+		t.pressed.connect(func() -> void:
+			Sfx.play("page")
+			_show(ii))
+		side.add_child(t)
+		_tabs.append(t)
 	side.add_child(UI.spacer(false, true))
-	var ver := UI.label("Versi 1.0.0 · Godot 4.7", "Small")
-	side.add_child(ver)
+	var logo := UI.hbox(6)
+	logo.add_child(Icon.new("leaf", Game.LEAF, 30))
+	logo.add_child(UI.label("Telkom University · Kampus Purwokerto", "Small", true))
+	side.add_child(logo)
 	var card := UI.panel("Card")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(card)
@@ -53,7 +60,9 @@ func build() -> void:
 	card.add_child(_scroll)
 	_page = UI.vbox(14)
 	_page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_scroll.add_child(_page)
+	_scroll.add_child(UI.xmargin(4, 4, 14, 8))
+	_scroll.get_child(0).add_child(_page)
+	reveal([side, card])
 	_show(0)
 
 
@@ -64,7 +73,7 @@ func default_focus() -> Control:
 func _show(i: int) -> void:
 	_tab = i
 	for k in _tabs.size():
-		_tabs[k].set_pressed_no_signal(k == i)
+		(_tabs[k] as TapCard).selected = k == i
 	for c in _page.get_children():
 		c.queue_free()
 	_scroll.scroll_vertical = 0
@@ -73,59 +82,70 @@ func _show(i: int) -> void:
 		1: _team()
 		2: _partner()
 		3: _howto()
+	UI.pop_in(_page.get_children(), 0.0, 0.04)
 
 
-func _p(text: String, variation: String = "Body") -> void:
-	_page.add_child(UI.label(text, variation, true))
+func _p(text: String, variation: String = "Body") -> Label:
+	var l := UI.label(text, variation, true)
+	_page.add_child(l)
+	return l
 
 
 func _about() -> void:
-	var h := UI.hbox(16)
+	var h := UI.hbox(18)
 	var j := Mascot.new()
 	j.custom_minimum_size = Vector2(130, 130)
 	h.add_child(j)
 	var v := UI.vbox(4)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(UI.label("Multimedia interaktif", "Caption"))
 	v.add_child(UI.label("VITAMOVE", "H1"))
-	v.add_child(UI.label("Multimedia Interaktif Edukasi Aktivitas Fisik untuk Peningkatan Kemandirian Lansia", "H3", true))
+	v.add_child(UI.label("Edukasi Aktivitas Fisik untuk Peningkatan Kemandirian Lansia", "H3", true))
 	h.add_child(v)
 	_page.add_child(h)
 	_p("VITAMOVE membantu lansia melihat, memahami, mempraktikkan, mengevaluasi, dan mengulang aktivitas fisik secara aman. Materi disajikan dengan teks ringkas, ilustrasi, suara, demonstrasi gerakan yang dapat diulang, dan latihan interaktif.")
-	_p("Materi: manfaat bergerak, persiapan latihan, pemanasan, keseimbangan, kelenturan, kekuatan ringan, aktivitas sehari-hari, pendinginan, dan keselamatan.")
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 8)
+	flow.add_theme_constant_override("v_separation", 8)
+	for s in ["Manfaat bergerak", "Persiapan", "Pemanasan", "Keseimbangan", "Kelenturan", "Kekuatan ringan", "Aktivitas sehari-hari", "Pendinginan", "Keselamatan"]:
+		flow.add_child(UI.chip(s, "ChipLeaf", "leaf", Game.LEAF_DARK))
+	_page.add_child(flow)
 	var np := UI.panel("Note")
 	np.add_child(UI.label("Penting: VITAMOVE adalah sarana edukasi, bukan pengganti pemeriksaan atau rekomendasi medis. Penyesuaian latihan tetap mengikuti arahan tenaga kesehatan.", "Body", true))
 	_page.add_child(np)
-	_p("Kredit: fon Atkinson Hyperlegible (Braille Institute) dan Lilita One, berlisensi SIL Open Font License. Musik gamelan dan efek suara dibuat khusus untuk aplikasi ini.", "Small")
+	_p("Kredit: fon Atkinson Hyperlegible (Braille Institute) dan Lilita One, berlisensi SIL Open Font License. Ilustrasi, musik gamelan, dan efek suara dibuat khusus untuk aplikasi ini.", "Small")
 
 
-func _person(name: String, role: String, detail: String, icon_col: Color, big: bool = false) -> Control:
-	var p := UI.panel("Cream" if big else "Pill")
+func _person(pname: String, role: String, detail: String, col: Color, big: bool = false) -> Control:
+	var p := UI.panel("Cream" if big else "Inset")
 	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var h := UI.hbox(14)
 	p.add_child(h)
 	var badge := Control.new()
-	var sz := 72.0 if big else 54.0
+	var sz := 76.0 if big else 56.0
 	badge.custom_minimum_size = Vector2(sz, sz)
 	badge.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	var initials := ""
-	for w in name.replace(",", " ").split(" ", false):
+	for w in pname.replace(",", " ").split(" ", false):
 		if initials.length() < 2 and w.length() > 0 and w[0] == w[0].to_upper() and not w.contains("."):
 			initials += w[0]
 	badge.draw.connect(func() -> void:
-		badge.draw_circle(badge.size / 2.0, sz / 2.0, icon_col, true, -1.0, true)
+		var c := badge.size / 2.0
+		badge.draw_circle(c + Vector2(0, 3), sz / 2.0, col.darkened(0.3), true, -1.0, true)
+		badge.draw_circle(c, sz / 2.0, col, true, -1.0, true)
 		var f := Game.font_display
 		var fsz := int(sz * 0.42)
 		var tw := f.get_string_size(initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fsz).x
-		badge.draw_string(f, Vector2(badge.size.x / 2.0 - tw / 2.0, badge.size.y / 2.0 + fsz * 0.36), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fsz, Color.WHITE))
+		badge.draw_string(f, Vector2(c.x - tw / 2.0, c.y + fsz * 0.36), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, fsz, Color.WHITE))
 	h.add_child(badge)
 	var v := UI.vbox(2)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	h.add_child(v)
-	var rl := UI.label(role, "Small")
-	rl.add_theme_color_override("font_color", icon_col.darkened(0.2))
+	var rl := UI.label(role, "Caption")
+	rl.add_theme_color_override("font_color", col.darkened(0.15))
 	v.add_child(rl)
-	v.add_child(UI.label(name, "H2" if big else "H3", true))
+	v.add_child(UI.label(pname, "H2" if big else "H3", true))
 	if detail != "":
 		v.add_child(UI.label(detail, "Small", true))
 	return p
@@ -140,52 +160,68 @@ func _team() -> void:
 	_page.add_child(UI.label("Tim Mahasiswa", "H2"))
 	var grid := GridContainer.new()
 	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for m in MAHASISWA:
-		grid.add_child(_person(m["name"], "Mahasiswa", "NIM %s" % m["nim"], Color("c98a12")))
+		grid.add_child(_person(m["name"], "Mahasiswa", "NIM %s" % m["nim"], Game.SAFFRON_DARK))
 	_page.add_child(grid)
 	_p("Direktorat Kampus Purwokerto · Kelompok Keahlian Data Science and Optimization", "Small")
 
 
 func _partner() -> void:
-	_page.add_child(UI.label("Mitra Sasaran", "H2"))
-	_p("Posyandu Lansia Wreda Asih 2, Desa Muntang, Kecamatan Kemangkon, Kabupaten Purbalingga, Jawa Tengah.")
+	_page.add_child(UI.label("Mitra sasaran", "Caption"))
+	_page.add_child(UI.label("Posyandu Lansia Wreda Asih 2", "H1", true))
+	_p("Desa Muntang, Kecamatan Kemangkon, Kabupaten Purbalingga, Jawa Tengah.")
 	var row := UI.hbox(12)
-	for s in [["30", "lansia", Game.TERRA], ["10", "kader", Game.TEAL_MID], ["2", "tenaga kesehatan", Game.LEAF]]:
-		var p := UI.panel("Pill")
+	for s in [["30", "lansia", Game.TERRA, "user"], ["10", "kader", Game.TEAL_MID, "people"], ["2", "tenaga kesehatan", Game.LEAF, "shield"]]:
+		var p := UI.panel("Inset")
 		p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var h := UI.hbox(10)
+		p.add_child(h)
+		h.add_child(UI.badge(s[3], s[2], 48))
 		var v := UI.vbox(0)
-		p.add_child(v)
-		var b := UI.label(s[0], "Big", false, HORIZONTAL_ALIGNMENT_CENTER)
+		var b := UI.label(s[0], "Big")
 		b.add_theme_color_override("font_color", s[2])
 		v.add_child(b)
-		v.add_child(UI.label(s[1], "Body", false, HORIZONTAL_ALIGNMENT_CENTER))
+		v.add_child(UI.label(s[1], "Small"))
+		h.add_child(v)
 		row.add_child(p)
 	_page.add_child(row)
 	_page.add_child(UI.label("Program", "H2"))
-	_p("Pengabdian kepada Masyarakat Telkom University · Tahun 2026, Periode 2 · Skema Teknologi Tepat Guna (TTG) · Bidang fokus Kesehatan · SDG 3 (Kehidupan Sehat dan Sejahtera) dan SDG 4 (Pendidikan Berkualitas).")
-	_p("Tahapan: sosialisasi dan pemetaan, pelatihan kader, tenaga kesehatan, dan lansia, penerapan VITAMOVE, pendampingan dan evaluasi, serta penguatan keberlanjutan.")
+	_p("Pengabdian kepada Masyarakat Telkom University · Tahun 2026, Periode 2 · Skema Teknologi Tepat Guna (TTG) · Bidang fokus Kesehatan · SDG 3 dan SDG 4.")
+	var steps := ["Sosialisasi & pemetaan", "Pelatihan", "Penerapan teknologi", "Pendampingan & evaluasi", "Keberlanjutan"]
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 8)
+	flow.add_theme_constant_override("v_separation", 8)
+	for i in steps.size():
+		flow.add_child(UI.chip("%d. %s" % [i + 1, steps[i]], "ChipSun", "", Game.INK))
+	_page.add_child(flow)
 	_page.add_child(UI.label("Peran", "H2"))
-	_p("Lansia: pengguna utama yang belajar dan berlatih.\nKader: operator dan pemandu sesi melalui menu Sesi Bersama.\nTenaga kesehatan: pengarah materi dan keselamatan latihan.")
+	for r in [["user", "Lansia", "Pengguna utama yang belajar dan berlatih.", Game.TERRA], ["people", "Kader", "Operator dan pemandu sesi lewat menu Sesi Bersama.", Game.TEAL_MID], ["shield", "Tenaga kesehatan", "Pengarah materi dan keselamatan latihan.", Game.LEAF]]:
+		var h2 := UI.hbox(12)
+		h2.add_child(UI.badge(r[0], r[3], 44))
+		var v2 := UI.vbox(0)
+		v2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v2.add_child(UI.label(r[1], "H3"))
+		v2.add_child(UI.label(r[2], "Small", true))
+		h2.add_child(v2)
+		_page.add_child(h2)
 
 
 func _howto() -> void:
 	var steps := [
-		["user", "Pilih atau buat peserta", "Satu HP dapat dipakai beberapa lansia. Pilih cara berlatih: duduk, berpegangan, atau mandiri."],
-		["eye", "LIHAT materi", "Baca kartu materi di setiap pos. Tekan Dengarkan bila suara pemandu tersedia."],
-		["run", "IKUTI gerakan", "Tekan Mulai, ikuti hitungan dan contoh gerakan. Ulangi atau pilih versi lebih ringan kapan saja."],
-		["quiz", "COBA tantangan", "Jawab kuis atau mainkan tantangan untuk mengumpulkan daun dan membuka pos berikutnya."],
-		["calendar", "Catat dan ulangi", "Lihat hari aktif dan hasil kuis awal-akhir di menu Catatan."],
-		["people", "Sesi Bersama (kader)", "Pilih rangkaian, catat jumlah peserta, lalu putar latihan berurutan untuk kelompok."],
+		["user", "Pilih atau buat peserta", "Satu HP dapat dipakai beberapa lansia. Pilih tokoh, warna baju, dan cara berlatih.", Game.TEAL_MID],
+		["eye", "LIHAT materi", "Baca kartu materi di setiap pos. Tekan Dengarkan bila suara pemandu tersedia.", Game.SAFFRON_DARK],
+		["run", "IKUTI gerakan", "Tekan Mulai lalu ikuti hitungan. Ulangi atau pilih versi lebih ringan kapan saja.", Game.TERRA],
+		["quiz", "COBA tantangan", "Jawab kuis atau mainkan tantangan untuk mengumpulkan daun dan membuka pos berikutnya.", Game.LEAF],
+		["calendar", "Catat dan ulangi", "Lihat hari aktif serta hasil kuis awal dan akhir di menu Catatan.", Color("5b6b78")],
+		["people", "Sesi Bersama (kader)", "Pilih rangkaian, catat jumlah peserta, lalu putar latihan berurutan untuk kelompok.", Game.TEAL],
 	]
 	for i in steps.size():
 		var s: Array = steps[i]
-		var p := UI.panel("Pill")
+		var p := UI.panel("Inset")
 		var h := UI.hbox(14)
 		p.add_child(h)
-		h.add_child(Icon.new(s[0], Game.TERRA, 46))
+		h.add_child(UI.badge(s[0], s[3], 52))
 		var v := UI.vbox(2)
 		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(UI.label("%d. %s" % [i + 1, s[1]], "H3"))
