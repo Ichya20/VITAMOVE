@@ -1,0 +1,50 @@
+; Engine configuration file.
+; VITAMOVE - Multimedia Interaktif Edukasi Aktivitas Fisik untuk Lansia
+
+config_version=5
+
+[application]
+
+config/name="VITAMOVE"
+config/description="Multimedia interaktif edukasi aktivitas fisik untuk peningkatan kemandirian lansia (Posyandu Lansia Wreda Asih 2)."
+config/version="1.0.0"
+run/main_scene="res://scenes/main.tscn"
+config/quit_on_go_back=false
+config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.0588, 0.298, 0.2902, 1)
+boot_splash/image="res://assets/splash.png"
+boot_splash/fullsize=false
+config/icon="res://icon.png"
+
+[audio]
+
+general/text_to_speech=true
+
+[autoload]
+
+Game="*res://scripts/game.gd"
+Sfx="*res://scripts/sfx.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[gui]
+
+common/show_focus_state_on_pointer_event=0
+common/snap_controls_to_pixels=true
+
+[input_devices]
+
+pointing/emulate_mouse_from_touch=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(1, 0.9647, 0.898, 1)
