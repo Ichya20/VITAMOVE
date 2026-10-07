@@ -24,7 +24,7 @@ func build() -> void:
 	make_content(26)
 	var v := UI.vbox(14)
 	content.add_child(v)
-	v.add_child(header("Info Aplikasi", "VITAMOVE · versi 1.1"))
+	v.add_child(header("Info Aplikasi", "VITAMOVE · versi 1.2"))
 	var row := UI.hbox(18)
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(row)

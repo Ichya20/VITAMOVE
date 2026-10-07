@@ -7,6 +7,8 @@ const SOUNDS := {
 	"page": preload("res://assets/audio/page.wav"),
 	"whoosh": preload("res://assets/audio/whoosh.wav"),
 	"cheer": preload("res://assets/audio/cheer.wav"),
+	"gong": preload("res://assets/audio/gong.wav"),
+	"chirp": preload("res://assets/audio/chirp.wav"),
 	"tick": preload("res://assets/audio/tick.wav"),
 	"tick_accent": preload("res://assets/audio/tick_accent.wav"),
 	"success": preload("res://assets/audio/success.wav"),

@@ -59,6 +59,8 @@ var profiles: Array = []
 var current := -1
 var group_log: Array = []
 var theme: Theme
+## Hanya berlaku selama aplikasi berjalan (tidak disimpan ke berkas).
+var splash_shown := false
 
 var _voice_id := ""
 var _voice_checked := false

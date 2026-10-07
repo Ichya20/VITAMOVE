@@ -71,19 +71,25 @@ func _draw() -> void:
 	# badan
 	_ell(Vector2(0, 12), 37, 31, white, 0.0, true)
 	_ell(Vector2(5, 25), 25, 13, shade)
-	# sayap
+	# sayap: bentuk tetes memanjang yang menempel di badan, ujungnya hitam
 	var speed := 14.0 if flap else 2.2
-	var amp := 0.7 if flap else 0.12
-	var wa := sin(_t * speed) * amp - (0.25 if talking else 0.0)
-	var pivot := Vector2(-6, 2)
-	var wing := PackedVector2Array([Vector2(-6, 2), Vector2(-40, -18), Vector2(-50, -4), Vector2(-42, 12), Vector2(-12, 24)])
-	var tipw := PackedVector2Array([Vector2(-40, -18), Vector2(-50, -4), Vector2(-44, 6), Vector2(-38, -8)])
+	var amp := 0.62 if flap else 0.1
+	var wa := sin(_t * speed) * amp - (0.22 if talking else 0.0)
+	var pivot := Vector2(-2, -2)
+	var wing := PackedVector2Array([
+		Vector2(2, -6), Vector2(-16, -17), Vector2(-38, -15), Vector2(-54, -2),
+		Vector2(-40, 11), Vector2(-18, 17), Vector2(-4, 12),
+	])
+	var tipw := PackedVector2Array([Vector2(-36, -15), Vector2(-54, -2), Vector2(-41, 10), Vector2(-31, -3)])
+	var quill := [[Vector2(-10, -9), Vector2(-36, -8)], [Vector2(-9, -2), Vector2(-33, -1)], [Vector2(-8, 5), Vector2(-28, 6)]]
 	for i in wing.size():
 		wing[i] = (wing[i] - pivot).rotated(wa) + pivot
 	for i in tipw.size():
 		tipw[i] = (tipw[i] - pivot).rotated(wa) + pivot
-	_poly(wing, Color("f1f1ea"))
+	_poly(wing, Color("f2f2eb"))
 	_poly(tipw, Color("2b2b2b"), false)
+	for q in quill:
+		draw_line((q[0] - pivot).rotated(wa) + pivot, (q[1] - pivot).rotated(wa) + pivot, Color("d8d8cd"), 2.0, true)
 	# kepala & jambul
 	for i in 5:
 		var base := Vector2(12 + i * 4, -36)

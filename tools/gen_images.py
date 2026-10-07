@@ -48,17 +48,27 @@ def icon(size=512):
 
 
 def splash():
-    W, H = 900, 420
+    """Boot splash Godot. Latar krem (diatur di project.godot) agar menyambung
+    mulus ke layar splash beranimasi, jadi tidak ada kedipan warna."""
+    W, H = 900, 360
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    ic = icon(220)
-    img.paste(ic, (40, 100), ic)
-    f = ImageFont.truetype(FONT, 132)
-    d.text((290, 120), "VITA", font=f, fill=CREAM)
-    w = d.textlength("VITA", font=f)
-    d.text((290 + w, 120), "MOVE", font=f, fill=SAFFRON)
-    f2 = ImageFont.truetype(FONT, 40)
-    d.text((294, 268), "Jelajah Sehat Desa", font=f2, fill=CREAM)
+    f = ImageFont.truetype(FONT, 136)
+    wv = d.textlength("VITA", font=f)
+    wm = d.textlength("MOVE", font=f)
+    leaf_w = 74
+    x0 = (W - (wv + wm + leaf_w)) / 2
+    y = 96
+    d.text((x0, y), "VITA", font=f, fill=TEAL)
+    d.text((x0 + wv, y), "MOVE", font=f, fill=TERRA)
+    # daun kecil di ujung logo
+    lx = x0 + wv + wm + 8
+    d.ellipse([lx, y + 26, lx + leaf_w - 20, y + 96], fill=LEAF2)
+    d.ellipse([lx + 6, y + 34, lx + leaf_w - 26, y + 88], fill=LEAF)
+    f2 = ImageFont.truetype(FONT, 38)
+    sub = "JELAJAH SEHAT DESA"
+    ws = d.textlength(sub, font=f2)
+    d.text(((W - ws) / 2, y + 150), sub, font=f2, fill=TERRA)
     return img
 
 
