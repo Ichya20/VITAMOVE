@@ -89,6 +89,43 @@ static func confetti(parent: Control, amount: int = 70) -> void:
 	parent.get_tree().create_timer(4.0).timeout.connect(p.queue_free)
 
 
+static func leaf_fall(parent: Control, delay: float = 0.0) -> CPUParticles2D:
+	## Daun kertas berjatuhan pelan dari atas layar (dipakai pada splash).
+	var p := CPUParticles2D.new()
+	p.texture = LEAF
+	p.amount = 26 if Game.motion() else 6
+	p.lifetime = 5.0
+	p.preprocess = 1.2
+	p.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	p.direction = Vector2(0, 1)
+	p.spread = 18.0
+	p.initial_velocity_min = 40.0
+	p.initial_velocity_max = 95.0
+	p.gravity = Vector2(6, 34)
+	p.angle_min = 0.0
+	p.angle_max = 360.0
+	p.angular_velocity_min = -55.0
+	p.angular_velocity_max = 55.0
+	p.scale_amount_min = 0.3
+	p.scale_amount_max = 0.62
+	p.color_initial_ramp = _ramp([Color("4f8a3c"), Color("8cc063"), Color("f2b134"), Color("6aa84f")])
+	p.modulate = Color(1, 1, 1, 0.75)
+	parent.add_child(p)
+	var fit := func() -> void:
+		p.emission_rect_extents = Vector2(parent.size.x * 0.52, 10)
+		p.position = Vector2(parent.size.x * 0.5, -30)
+	parent.resized.connect(fit)
+	fit.call()
+	if delay > 0.0:
+		p.emitting = false
+		parent.get_tree().create_timer(delay).timeout.connect(func() -> void:
+			if is_instance_valid(p):
+				p.emitting = true)
+	else:
+		p.emitting = true
+	return p
+
+
 static func float_text(parent: Control, at: Vector2, text: String, col: Color = Color("4f8a3c")) -> void:
 	if parent == null or not parent.is_inside_tree():
 		return

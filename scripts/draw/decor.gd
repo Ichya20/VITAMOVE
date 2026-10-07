@@ -5,6 +5,7 @@ extends Control
 @export var kind := "birds"   # birds | tikar | rays | ribbon | sparkles
 @export var color := Color("f2b134")
 @export var text := ""
+@export var alpha := 1.0
 var speed := 30.0
 var _t := 0.0
 var _seed := 0.0
@@ -87,9 +88,9 @@ func _draw_rays() -> void:
 	for i in n:
 		var a0 := _t * 0.18 + i * TAU / n
 		var a1 := a0 + TAU / n * 0.5
-		draw_colored_polygon(PackedVector2Array([c, c + Vector2(cos(a0), sin(a0)) * r, c + Vector2(cos(a1), sin(a1)) * r]), Color(color, 0.22))
+		draw_colored_polygon(PackedVector2Array([c, c + Vector2(cos(a0), sin(a0)) * r, c + Vector2(cos(a1), sin(a1)) * r]), Color(color, 0.22 * alpha))
 	for i in 4:
-		draw_circle(c, r * (0.22 + i * 0.07), Color(color, 0.12), true, -1.0, true)
+		draw_circle(c, r * (0.22 + i * 0.07), Color(color, 0.12 * alpha), true, -1.0, true)
 
 
 func _draw_ribbon() -> void:

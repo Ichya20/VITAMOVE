@@ -44,6 +44,17 @@ func go(screen: String, p: Dictionary = {}) -> void:
 func _run() -> void:
 	Game.reset_all()
 	Game.settings["tts"] = false
+	# splash beranimasi
+	await wait(0.55)
+	await shot("splash_a_slide")
+	await wait(0.75)
+	await shot("splash_b_meet")
+	await wait(0.65)
+	await shot("splash_c_ribbon")
+	await wait(0.85)
+	await shot("splash_d_jali")
+	await wait(0.7)
+	await shot("splash_e_full")
 	await wait(1.6)
 	await shot("title_empty")
 	await go("profiles", {"create": true})

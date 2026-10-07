@@ -2,6 +2,7 @@ extends Control
 ## Pengatur layar, transisi kertas, dialog, notifikasi singkat, dan tombol kembali Android.
 
 const SCREENS := {
+	"splash": preload("res://scripts/screens/splash_screen.gd"),
 	"title": preload("res://scripts/screens/title_screen.gd"),
 	"profiles": preload("res://scripts/screens/profile_screen.gd"),
 	"map": preload("res://scripts/screens/map_screen.gd"),
@@ -44,12 +45,25 @@ func _ready() -> void:
 	_wipe = PaperWipe.new()
 	UI.full(_wipe)
 	add_child(_wipe)
-	go("title")
+	# Splash beranimasi hanya saat aplikasi pertama dibuka, bukan tiap ke Beranda.
+	if Game.splash_shown:
+		go("title")
+	else:
+		Game.splash_shown = true
+		go("splash")
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--tour=") and ResourceLoader.exists("res://scripts/dev/tour.gd"):
 			var t: Node = load("res://scripts/dev/tour.gd").new()
 			t.set("main", self)
 			add_child(t)
+		elif a.begins_with("--splash-shot=") and ResourceLoader.exists("res://scripts/dev/splash_shot.gd"):
+			var ss: Node = load("res://scripts/dev/splash_shot.gd").new()
+			ss.set("main", self)
+			add_child(ss)
+		elif a == "--splash-check" and ResourceLoader.exists("res://scripts/dev/splash_check.gd"):
+			var sc: Node = load("res://scripts/dev/splash_check.gd").new()
+			sc.set("main", self)
+			add_child(sc)
 
 
 func safe_margins() -> Vector4:

@@ -186,3 +186,48 @@ if __name__ == "__main__":
     write("whoosh.wav", whoosh())
     write("cheer.wav", cheer())
     print("ok")
+
+
+# ------------------------------------------------------------------ suara splash
+def gong():
+    """Gong ageng lembut: nada rendah dengan parsial inharmonik dan peluruhan panjang."""
+    base = 293.0 / 4
+    out = [0.0] * int(4.2 * SR)
+    partials = ((1.0, 1.0), (1.48, 0.42), (2.05, 0.26), (2.78, 0.16), (3.9, 0.08))
+    n = len(out)
+    for i in range(n):
+        t = i / SR
+        env = math.exp(-0.95 * t) * min(1.0, t * 160)
+        s = 0.0
+        for r, a in partials:
+            s += a * math.sin(2 * math.pi * base * r * t + 0.4 * math.sin(2 * math.pi * 1.7 * t))
+        out[i] = s * env
+    # desir pukulan di awal
+    random.seed(11)
+    lp = 0.0
+    for i in range(int(0.12 * SR)):
+        lp += 0.08 * (random.uniform(-1, 1) - lp)
+        out[i] += lp * 0.5 * math.exp(-28 * i / SR)
+    return out
+
+
+def chirp():
+    """Kicau jalak: dua siulan naik yang singkat."""
+    out = [0.0] * int(0.55 * SR)
+    for k, (t0, f0, f1, dur) in enumerate([(0.0, 1500, 2600, 0.11), (0.17, 1800, 3100, 0.13), (0.37, 1600, 2300, 0.09)]):
+        n = int(dur * SR)
+        for i in range(n):
+            t = i / SR
+            p = i / n
+            f = f0 + (f1 - f0) * p
+            env = math.sin(math.pi * p) ** 1.2
+            j = int(t0 * SR) + i
+            if j < len(out):
+                out[j] += math.sin(2 * math.pi * f * t) * env * 0.8
+    return out
+
+
+if True:
+    write("gong.wav", gong())
+    write("chirp.wav", chirp())
+    print("ok splash sounds")
